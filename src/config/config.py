@@ -1,7 +1,7 @@
 CrowdStrike = {
-    'url': '',
-    'token_endpoint': '',
-    'stream_endpoint': '',
+    'url': 'https://api.crowdstrike.com',
+    'token_endpoint': '/oauth2/token',
+    'stream_endpoint': '/sensors/entities/datafeed/v2',
     'app_id': '',
     'cid': '',
     'secret': '',
@@ -15,3 +15,4 @@ TheHive = {
     'key': '',
     'template': '',
 }
+
