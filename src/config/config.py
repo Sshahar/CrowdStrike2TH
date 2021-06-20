@@ -13,4 +13,5 @@ CrowdStrike['url_stream'] = CrowdStrike['url'] + CrowdStrike['stream_endpoint'] 
 TheHive = {
     'url': '',
     'key': '',
+    'template': '',
 }

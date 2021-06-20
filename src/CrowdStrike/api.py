@@ -3,17 +3,21 @@ import json
 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
-from config import CrowdStrike
 
 
-class CrowdStrikeAPI:
-    def __init__(self):
-        self.client = OAuth2Session(client=BackendApplicationClient(CrowdStrike.get('cid')))
-        self.client.fetch_token(token_url=CrowdStrike.get('url_token'), client_secret=CrowdStrike.get('secret'))
+class Api:
+    def __init__(self, config):
+        self.url_token = config['url_token']
+        self.url_stream = config['url_stream']
+        self.key = config['cid']
+        self.secret = config['secret']
+
+        self.client = OAuth2Session(client=BackendApplicationClient(self.key))
+        self.client.fetch_token(token_url=self.url_token, client_secret=self.secret)
 
     def get_stream(self):
         """Get Event-Stream, parses it, and prints it's events."""
-        response = self.client.get(CrowdStrike['url_stream'])
+        response = self.client.get(self.url_stream)
         url_data_feed, token, refresh_session_url = self._parse_response(response)
         self.client.auto_refresh_url = refresh_session_url
         self._get_events(url_data_feed, token)
@@ -49,12 +53,3 @@ class CrowdStrikeAPI:
             if line:
                 decoded_line = line.decode('utf-8')
                 print(json.loads(decoded_line))
-
-
-def main():
-    crowdstrike_api = CrowdStrikeAPI()
-    crowdstrike_api.get_stream()
-
-
-if __name__ == '__main__':
-    main()
