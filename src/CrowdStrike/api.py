@@ -39,6 +39,7 @@ class Api:
     @staticmethod
     def _get_events(url_data_feed, token):
         """
+        https://falcon.crowdstrike.com/documentation/89/event-streams-apis
         Prints events from data feed using token to authenticate.
         :param url_data_feed: URL to get events from
         :param token: token to authenticate
@@ -53,3 +54,23 @@ class Api:
             if line:
                 decoded_line = line.decode('utf-8')
                 print(json.loads(decoded_line))
+
+    def get_detects(self):
+        """
+        https://falcon.crowdstrike.com/documentation/86/detections-monitoring-apis
+        :return:
+        """
+        response = self.client.get("https://api.crowdstrike.com/detects/queries/detects/v1")
+        j = json.loads(response.text)
+        detect_ids = j['resources']
+
+        res2 = self.client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
+                                json={"ids": detect_ids},
+                                headers={
+                                    "Accept": "application/json",
+                                    "Content-Type": "application/json"
+                                })
+
+        j = json.loads(res2.text)
+
+        return j

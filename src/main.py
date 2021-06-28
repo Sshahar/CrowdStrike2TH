@@ -4,7 +4,9 @@ from CrowdStrike import Api
 
 def main():
     crowdstrike_api = Api(CrowdStrike)
-    crowdstrike_api.get_stream()
+    detects = crowdstrike_api.get_detects()
+
+    print(detects)
 
 
 if __name__ == '__main__':
