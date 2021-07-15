@@ -6,20 +6,26 @@ from requests_oauthlib import OAuth2Session
 
 
 class Api:
-    def __init__(self, config):
-        self.url_token = config['url_token']
-        self.url_stream = config['url_stream']
-        self.key = config['cid']
-        self.secret = config['secret']
+    def __init__(self, key="", secret="", base_url='https://api.crowdstrike.com'):
+        """
 
-        self.client = OAuth2Session(client=BackendApplicationClient(self.key))
-        self.client.fetch_token(token_url=self.url_token, client_secret=self.secret)
+        :param key:
+        :param secret:
+        :param base_url:
+        """
+        self._url_token = base_url + '/oauth2/token'
+        self._url_stream = base_url + '/sensors/entities/datafeed/v2'
+        self._key = key
+        self._secret = secret
+
+        self._client = OAuth2Session(client=BackendApplicationClient(self._key))
+        self._client.fetch_token(token_url=self._url_token, client_secret=self._secret)
 
     def get_stream(self):
         """Get Event-Stream, parses it, and prints it's events."""
-        response = self.client.get(self.url_stream)
+        response = self._client.get(self._url_stream)
         url_data_feed, token, refresh_session_url = self._parse_response(response)
-        self.client.auto_refresh_url = refresh_session_url
+        self._client.auto_refresh_url = refresh_session_url
         self._get_events(url_data_feed, token)
 
     @staticmethod
@@ -60,11 +66,13 @@ class Api:
         https://falcon.crowdstrike.com/documentation/86/detections-monitoring-apis
         :return:
         """
-        response = self.client.get("https://api.crowdstrike.com/detects/queries/detects/v1")
+        response = self._client.get("https://api.crowdstrike.com/detects/queries/detects/v1",
+                                    params={'sort': 'first_behavior', 'limit': 100},
+                                    )
         j = json.loads(response.text)
         detect_ids = j['resources']
 
-        res2 = self.client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
+        res2 = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
                                 json={"ids": detect_ids},
                                 headers={
                                     "Accept": "application/json",
