@@ -73,11 +73,11 @@ class Api:
         detect_ids = j['resources']
 
         res2 = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                json={"ids": detect_ids},
-                                headers={
+                                 json={"ids": detect_ids},
+                                 headers={
                                     "Accept": "application/json",
                                     "Content-Type": "application/json"
-                                })
+                                 })
 
         j = json.loads(res2.text)
 
