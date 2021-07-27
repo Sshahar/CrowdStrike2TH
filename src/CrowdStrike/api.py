@@ -61,23 +61,24 @@ class Api:
                 decoded_line = line.decode('utf-8')
                 print(json.loads(decoded_line))
 
-    def get_detects(self):
+    def get_detects(self, since):
         """
         https://falcon.crowdstrike.com/documentation/86/detections-monitoring-apis
         :return:
         """
         response = self._client.get("https://api.crowdstrike.com/detects/queries/detects/v1",
-                                    params={'sort': 'first_behavior', 'limit': 100},
+                                    params={'sort': 'first_behavior', 'limit': 1000,
+                                            'filter': f"first_behavior:>'{since}'"},
                                     )
         j = json.loads(response.text)
         detect_ids = j['resources']
 
         res2 = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                 json={"ids": detect_ids},
-                                 headers={
+                                json={"ids": detect_ids},
+                                headers={
                                     "Accept": "application/json",
                                     "Content-Type": "application/json"
-                                 })
+                                })
 
         j = json.loads(res2.text)
 
