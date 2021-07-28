@@ -80,10 +80,10 @@ class Api:
 
     def get_these_detects(self, detect_ids):
         result = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                json={"ids": detect_ids},
-                                headers={
+                                   json={"ids": detect_ids},
+                                   headers={
                                       "Accept": "application/json",
                                       "Content-Type": "application/json"
-                                })
+                                   })
 
         return json.loads(result.text)
