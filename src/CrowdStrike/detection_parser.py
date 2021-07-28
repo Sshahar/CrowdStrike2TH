@@ -24,7 +24,7 @@ class DetectionParser:
         time_str = d['created_timestamp']
         if '.' in time_str:
             time_str = time_str.split('.')[0]+'Z'
-        dt = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S%z").astimezone()
+        dt = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ").astimezone()
         time_str = dt.strftime('%B')[:3] + dt.strftime('. %d, %Y %H:%M:%S')
 
         return [d['cid'], customer, time_str, d['device']['hostname']+'/'+d['behaviors'][0]['user_name'],
