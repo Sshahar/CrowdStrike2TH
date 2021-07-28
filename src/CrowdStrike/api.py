@@ -74,17 +74,16 @@ class Api:
                                     params=params)
         j = json.loads(response.text)
         detect_ids = j['resources']
+        detects = self.get_these_detects(detect_ids)
 
-        res2 = self.get_these_detects(detect_ids)
-
-        j = json.loads(res2.text)
-
-        return j
+        return detects
 
     def get_these_detects(self, detect_ids):
-        return self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                 json={"ids": detect_ids},
-                                 headers={
+        result = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
+                                json={"ids": detect_ids},
+                                headers={
                                       "Accept": "application/json",
                                       "Content-Type": "application/json"
-                                 })
+                                })
+
+        return json.loads(result.text)
