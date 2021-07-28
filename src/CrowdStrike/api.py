@@ -61,25 +61,30 @@ class Api:
                 decoded_line = line.decode('utf-8')
                 print(json.loads(decoded_line))
 
-    def get_detects(self, since):
+    def get_detects(self, since=None):
         """
         https://falcon.crowdstrike.com/documentation/86/detections-monitoring-apis
         :return:
         """
+        params = {'sort': 'first_behavior', 'limit': 1000}
+        if since is not None:
+            params['filter'] = f"first_behavior:>'{since}'"
+
         response = self._client.get("https://api.crowdstrike.com/detects/queries/detects/v1",
-                                    params={'sort': 'first_behavior', 'limit': 1000,
-                                            'filter': f"first_behavior:>'{since}'"},
-                                    )
+                                    params=params)
         j = json.loads(response.text)
         detect_ids = j['resources']
 
-        res2 = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                json={"ids": detect_ids},
-                                headers={
-                                    "Accept": "application/json",
-                                    "Content-Type": "application/json"
-                                })
+        res2 = self.get_these_detects(detect_ids)
 
         j = json.loads(res2.text)
 
         return j
+
+    def get_these_detects(self, detect_ids):
+        return self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
+                                 json={"ids": detect_ids},
+                                 headers={
+                                      "Accept": "application/json",
+                                      "Content-Type": "application/json"
+                                 })
