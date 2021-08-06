@@ -10,9 +10,16 @@ def print_detect(detect):
 def main():
     crowdstrike_api = Api(key=CrowdStrike.get("cid"), secret=CrowdStrike.get("secret"))
 
-    detects = crowdstrike_api.get_detects()
+    detects = crowdstrike_api.get_detects(since=4)
 
-    print_detect(detects['resources'][3])
+    # print_detect(detects['resources'][3])
+
+    for i, detect in enumerate(detects['resources']):
+        if i == 10:
+            break
+        print(detect['behaviors'][0].get('sha256'))
+
+    print(detects['resources'][3])
 
 
 if __name__ == '__main__':
