@@ -1,29 +1,28 @@
 import requests
 import json
-
-from oauthlib.oauth2 import BackendApplicationClient
-from requests_oauthlib import OAuth2Session
+from falconpy.oauth2 import OAuth2
+from falconpy.event_streams import Event_Streams
+from falconpy.detects import Detects
 
 
 class Api:
-    def __init__(self, key="", secret="", base_url='https://api.crowdstrike.com'):
+    def __init__(self, key="", secret="", base_url='https://api.crowdstrike.com', appId=""):
         """
 
         :param key:
         :param secret:
         :param base_url:
         """
-        self._url_token = base_url + '/oauth2/token'
-        self._url_stream = base_url + '/sensors/entities/datafeed/v2'
         self._key = key
         self._secret = secret
-
-        self._client = OAuth2Session(client=BackendApplicationClient(self._key))
-        self._client.fetch_token(token_url=self._url_token, client_secret=self._secret)
+        self._app_id = appId
+        self._api_auth = OAuth2(creds={"client_id": key, "client_secret": secret}, base_url=base_url)
+        self._api_detects = Detects(auth_object=self._api_auth)
+        self._api_event_streams = Event_Streams(auth_object=self._api_auth)
 
     def get_stream(self):
         """Get Event-Stream, parses it, and prints it's events."""
-        response = self._client.get(self._url_stream)
+        response = self._api_event_streams.listAvailableStreamsOAuth2(appId=self._app_id)
         url_data_feed, token, refresh_session_url = self._parse_response(response)
         self._client.auto_refresh_url = refresh_session_url
         self._get_events(url_data_feed, token)
@@ -66,24 +65,16 @@ class Api:
         https://falcon.crowdstrike.com/documentation/86/detections-monitoring-apis
         :return:
         """
-        params = {'sort': 'first_behavior', 'limit': 1000}
+        filter = None
         if since is not None:
-            params['filter'] = f"first_behavior:>'{since}'"
+            filter = f"first_behavior:>'{since}'"
 
-        response = self._client.get("https://api.crowdstrike.com/detects/queries/detects/v1",
-                                    params=params)
-        j = json.loads(response.text)
-        detect_ids = j['resources']
+        response = self._api_detects.QueryDetects(filter=filter, limit=1000, sort="first_behavior")
+
+        detect_ids = response["body"]["resources"]
         detects = self.get_these_detects(detect_ids)
 
         return detects
 
     def get_these_detects(self, detect_ids):
-        result = self._client.post("https://api.crowdstrike.com/detects/entities/summaries/GET/v1",
-                                   json={"ids": detect_ids},
-                                   headers={
-                                      "Accept": "application/json",
-                                      "Content-Type": "application/json"
-                                   })
-
-        return json.loads(result.text)
+        return self._api_detects.GetDetectSummaries(body={"ids": detect_ids})["body"]
