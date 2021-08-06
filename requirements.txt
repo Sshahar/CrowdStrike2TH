@@ -10,3 +10,4 @@ setuptools-scm==6.0.1
 thehive4py==1.8.1
 urllib3~=1.24.0
 wrapt==1.12.1
+crowdstrike-falconpy>=0.5.5
