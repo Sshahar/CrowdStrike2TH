@@ -8,11 +8,15 @@ def print_detect(detect):
 
 
 def main():
-    crowdstrike_api = Api(key=CrowdStrike.get("cid"), secret=CrowdStrike.get("secret"))
+
+    crowdstrike_api = Api(key=CrowdStrike.get("client_id"),
+                          secret=CrowdStrike.get("client_secret"),
+                          appId=CrowdStrike.get("appId")
+                          )
 
     detects = crowdstrike_api.get_detects()
-
-    print_detect(detects['resources'][3])
+    for detection in detects["resources"]:
+        print_detect(detection)
 
 
 if __name__ == '__main__':
